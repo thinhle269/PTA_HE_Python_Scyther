@@ -1,0 +1,26 @@
+
+protocol MCC3Parties(MobileDevice, TTP, Verifier)
+{
+	role MobileDevice
+	{
+            ....
+		// Step 1: Mobile Device sends initial attestation request to Verifier
+                 send_1(MobileDevice, Verifier, {{NonceM}sk(MobileDevice), MobileDevice, EphemeralKeyM}pk(Verifier));
+	    ....
+	}
+
+	role TTP
+	{
+           .... 
+	}
+
+	role Verifier
+	{
+          .....
+           recv_1(MobileDevice, Verifier, {{NonceM}sk(MobileDevice), MobileDevice, EphemeralKeyM}pk(Verifier));
+          ....
+	}
+}
+
+
+
