@@ -1,0 +1,90 @@
+protocol PTAHEProtocol(MobileDevice, TTP, Verifier)
+{
+    role MobileDevice
+    {
+        fresh NB: Nonce;
+        fresh NMN: Nonce;
+        fresh NK: Nonce;
+        fresh EphemeralKeyM: Nonce;
+        var NV1, NTTP, NV: Nonce;
+        fresh TM, TJ: Timestamp;
+        var MID, VID: Agent;
+
+        // Step 1: Mobile Device sends initial attestation request to Verifier
+        send_1(MobileDevice, Verifier, {{hash(MID), NB, NMN, TM}sk(MobileDevice)}pk(Verifier)); // Corrected to ensure direct communication with Verifier
+
+        // Step 3: Mobile Device sends verification data to Verifier
+        send_3(MobileDevice, Verifier, {{hash(pkV), NV1, NTTP}sk(MobileDevice)}pk(Verifier));
+
+        // Step 4: Mobile Device sends attestation information to Verifier
+        send_4(MobileDevice, Verifier, {{hash(MID), VID, NK, TJ}sk(MobileDevice)}pk(Verifier));
+
+        // Step 6: Mobile Device sends Platform Configuration to TTP
+        send_6(MobileDevice, TTP, {PCR, PS, hash(MID, VID, NV, TJ)}pk(TTP));
+
+        // Security claims
+        claim(MobileDevice, Secret, NB);
+        claim(MobileDevice, Secret, NMN);
+        claim(MobileDevice, Secret, NK);
+        claim(MobileDevice, Nisynch);
+    }
+
+    role TTP
+    {
+        fresh NV1: Nonce;
+        fresh NTTP: Nonce;
+        var NB, NMN, NK: Nonce;
+        var MID, VID: Agent;
+        fresh TTP: Timestamp;
+
+        // Step 2: TTP forwards nonce to Verifier
+        send_2(TTP, Verifier, {{hash(MID), NV1}sk(TTP)}pk(Verifier));
+
+        // Step 3: TTP receives verification data from Mobile Device
+        recv_3(MobileDevice, TTP, {{hash(pkV), NV1, NTTP}sk(MobileDevice)}pk(TTP));
+
+        // Step 5: TTP sends attestation results to Verifier, including a homomorphic computation
+        // Simulating Homomorphic Encryption: TTP sends encrypted nonce and results of computation
+        send_5(TTP, Verifier, {PS, Enc(pkV, f(hash(MID, VID, NTTP, NV, TTP)))});
+
+        // Step 7: TTP sends verification results to Mobile Device
+        send_7(TTP, MobileDevice, {hash(PS), MID, VID, NTTP, NV, TTP}pk(MobileDevice));
+
+        // Step 8: TTP confirms verification data to Verifier
+        send_8(TTP, Verifier, {{hash(NV1, NTTP, PSP, MID, VID, NV, NK, TTP)}sk(TTP)}pk(Verifier));
+
+        // Security claims
+        claim(TTP, Secret, NV1);
+        claim(TTP, Secret, NTTP);
+        claim(TTP, Nisynch);
+    }
+
+    role Verifier
+    {
+        fresh NV: Nonce;
+        var NV1, NTTP, NK: Nonce;
+        fresh TJ: Timestamp;
+        var MID, VID: Agent;
+
+        // Step 1: Verifier receives initial attestation request from Mobile Device
+        recv_1(MobileDevice, Verifier, {{hash(MID), NB, NMN, TM}sk(MobileDevice)}pk(Verifier));
+
+        // Step 2: Verifier receives forwarded nonce from TTP
+        recv_2(TTP, Verifier, {{hash(MID), NV1}sk(TTP)}pk(Verifier));
+
+        // Step 4: Verifier receives attestation information from Mobile Device
+        recv_4(MobileDevice, Verifier, {{hash(MID), VID, NK, TJ}sk(MobileDevice)}pk(Verifier));
+
+        // Step 5: Verifier receives attestation results from TTP, and performs decryption
+        recv_5(TTP, Verifier, {PS, Enc(pkV, f(hash(MID, VID, NTTP, NV, TTP)))});
+        // Simulated decryption of homomorphic computation result
+        f_result = decrypt(Enc(pkV, f(hash(MID, VID, NTTP, NV, TTP))), skV);
+
+        // Step 8: Verifier receives confirmation of verification data from TTP
+        recv_8(TTP, Verifier, {{hash(NV1, NTTP, PSP, MID, VID, NV, NK, TTP)}sk(TTP)}pk(Verifier));
+
+        // Security claims
+        claim(Verifier, Secret, NV);
+        claim(Verifier, Nisynch);
+    }
+}
