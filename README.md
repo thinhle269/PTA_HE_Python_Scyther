@@ -1,7 +1,7 @@
 #Python code for performance
 #Scyther_PTA_HE
 3 parties test with different message exchange
- improve with HE with 4 test file
+ improve with HE with 4 test files
 ---
 Abstract ( need intro Scyther)
  This paper introduces an enhanced Property-based Token Attestation scheme, PTA-HE, which integrates Homomorphic Encryption (HE) to strengthen security in mobile cloud computing environments. While traditional PTA protocols offer a foundational security layer, they often fall short in preserving data confidentiality and integrity during the attestation process, especially when data is actively being processed. PTA-HE addresses these shortcomings by enabling secure computations directly on encrypted data, ensuring that sensitive information remains protected and tamper-resistant even under continuous handling. The proposed scheme employs Trusted Third Parties (TTPs) and cloud servers to facilitate attestation, while HE safeguards plaintext data from exposure. We evaluate PTA-HE based on computational and communication overheads, latency, and scalability, demonstrating that although these factors increase relative to standard PTA, the enhanced security and privacy protections justify the trade-offs. Furthermore, we present a verification process using the Scyther tool, confirming the protocol’s improved correctness and robustness against a range of potential attacks. As a result, PTA-HE emerges as a compelling solution for applications where rigorous data privacy and integrity assurances are paramount.
