@@ -1,0 +1,67 @@
+
+protocol MCC3Parties(MobileDevice, TTP, Verifier)
+{
+	role MobileDevice
+	{
+		fresh NonceM: Nonce;
+		var NonceT, NonceV: Nonce;
+
+		// Step 1: Mobile Device sends initial attestation request to TTP
+		send_1(MobileDevice, TTP, {NonceM, MobileDevice}pk(Verifier));
+
+		// Step 2: Mobile Device receives NonceT from TTP
+		recv_2(TTP, MobileDevice, {NonceM, NonceT}pk(MobileDevice));
+
+		// Step 3: Mobile Device sends verification data to TTP
+		send_3(MobileDevice, TTP, {NonceM, NonceT}pk(TTP));
+
+		// Step 4: Mobile Device receives attestation token from TTP
+		recv_4(TTP, MobileDevice, {NonceV, MobileDevice}pk(Verifier));
+
+              recv_6(Verifier, MobileDevice, {NonceV, MobileDevice}pk(MobileDevice));
+		// Security claims
+		claim(MobileDevice,Secret, NonceM);
+		claim(MobileDevice,Secret, NonceT);
+		claim(MobileDevice, Nisynch);
+	}
+
+	role TTP
+	{
+		var NonceM: Nonce;
+		fresh NonceT, NonceV: Nonce;
+
+		// Step 1: TTP receives initial attestation request from Mobile Device
+		recv_1(MobileDevice, TTP, {NonceM, MobileDevice}pk(Verifier));
+
+		// Step 2: TTP generates fresh NonceT and sends it to Mobile Device
+		send_2(TTP, MobileDevice, {NonceM, NonceT}pk(MobileDevice));
+
+		// Step 3: TTP receives verification data from Mobile Device
+		recv_3(MobileDevice, TTP, {NonceM, NonceT}pk(TTP));
+               ///////
+               send_4(TTP, MobileDevice, {NonceV, MobileDevice}pk(Verifier));
+		// Step 4: TTP sends verified attestation token to Verifier
+		send_5(TTP, Verifier, {NonceV, MobileDevice}pk(Verifier));
+
+		// Security claims
+		claim(TTP,Secret, NonceM);
+		claim(TTP,Secret, NonceV);
+		claim(TTP, Nisynch);
+	}
+
+	role Verifier
+	{
+		var NonceV: Nonce;
+
+		// Step 1: Verifier receives attestation token from TTP
+		recv_5(TTP, Verifier, {NonceV, MobileDevice}pk(Verifier));
+
+		// Step 2: Verifier sends confirmation to Mobile Device
+		send_6(Verifier, MobileDevice, {NonceV, MobileDevice}pk(MobileDevice));
+
+		// Security claims
+		claim(Verifier,Secret, NonceV);
+                claim(Verifier,Secret, NonceM);
+		claim(Verifier, Nisynch);
+	}
+}
